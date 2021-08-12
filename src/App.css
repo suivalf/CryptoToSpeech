@@ -1,5 +1,53 @@
+
+
 .App {
   text-align: center;
+}
+
+.welcome-div {
+  position: relative;
+  text-align: center;
+}
+
+p {
+  color: rgb(0, 0, 0);
+  border-radius: 3px;
+  border-color: white;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 23px;
+}
+
+.page {
+  height: 100%;
+  width: 100%;
+}
+
+.play-button {
+  color: red;
+  size: 30px;
+}
+
+.container {
+  text-align: center;
+  position: flex;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.coins {
+  background-color: rgba(22, 67, 110, 0.452);
+}
+
+.my-coins {
+  width: 75%;
+  text-align: left;
+  float: left;
+}
+
+.my-buttons {
+  width: 25%;
+
+  float: right;
 }
 
 .App-logo {
@@ -35,4 +83,24 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.452);
+  color: white;
+  text-align: center;
+}
+
+.empty-div {
+  height: 200px;
+  position: relative;
+  background-color: rgb(255, 255, 255);
+}
+
+.player {
+  float: left;
 }

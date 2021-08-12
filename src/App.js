@@ -2,7 +2,12 @@ import React, {Component} from 'react';
 import './App.css';
 import TimeComponent from './components/time';
 import Speech from 'react-speech';
+import Talk from './components/talk';
 import NavBar from './components/navbar';
+import Welcome from './components/welcome';
+import Player from './components/Player';
+import { useSpeechSynthesis } from "react-speech-kit";
+import Example from './components/talk';
 
 const styleContainer = {
   color: "Gray"
@@ -21,7 +26,7 @@ constructor(props){
 
 getCoinsData = async () => {
   //https://agile-plateau-78718.herokuapp.com/
-    fetch("https://api.coincap.io/v2/assets/").then(
+    fetch("http://localhost:8080/https://api.coincap.io/v2/assets/").then(
     res => res.json()).then(
       (result) => {
         this.setState({
@@ -30,38 +35,56 @@ getCoinsData = async () => {
         }, () => {
           localStorage.setItem('coins', JSON.stringify(this.state.coins))
         });
-        //console.log(this.state.coins);
+        console.log(this.state.coins);
       },
-      () => {
+      (error) => {
+        //console.log('Yikes ' + error);
         this.getCoinsData();
       }
     )
 }
 
-updatePriceOfCoin = async (coinId) => {
-  fetch("https://api.coincap.io/v2/assets/" + coinId).then(
+getCoinIndex = (coinId) => {
+  var i = 0;
+  for (i; i<this.state.coins.length;i++){
+    if (this.state.coins[i].id === coinId){
+      return i;
+    }
+  }
+  return -1;
+}
+
+updatePriceOfCoin = async () => {
+  fetch("http://localhost:8080/https://api.coincap.io/v2/assets/").then(
     res => res.json()).then(
       (result) => {
-        // Make a shallow copy of the coins in "portfolio"
+        this.setState({
+          coins: result.data
+        }, () => {
+          localStorage.setItem('coins', JSON.stringify(this.state.coins))
+        });
+        var i = 0;
         let myOldCoins = [...this.state.myCoins];
-        // Find the index of the coin in our "portfolio" that matches the 'coinId'
-        var index = this.state.myCoins.findIndex(function(coin) {
-          return coin.id === coinId;
-        })
-        // Make a shallow copy of the coin to be mutated
-        let myOldCoin = {...myOldCoins[index]};
-        // Replace it's old price with the new price
-        myOldCoin.priceUsd = result.data.priceUsd;
-        // Replace the old coin with the new one
-        myOldCoins[index] = myOldCoin;
+        for (i; i < this.state.myCoins.length; i++){
+          let index = this.getCoinIndex(this.state.myCoins[i].id);
+          
+          // Make a shallow copy of the coin to be mutated
+          let myOldCoin = {...myOldCoins[i]};
+          // Replace it's old price with the new price
+          myOldCoin.priceUsd = this.state.coins[index].priceUsd;
+          // Replace the old coin with the new one
+          myOldCoins[i] = myOldCoin;
+        }
+
         this.setState({myCoins: myOldCoins},
           () => {
           localStorage.setItem('myCoins', JSON.stringify(this.state.myCoins))
         });
 
       },
-      () => {
-        this.updatePriceOfCoin(coinId);
+      (error) => {
+        //console.log('Yikes ' + error);
+        this.updatePriceOfCoin();
       }
     )
 }
@@ -89,9 +112,7 @@ componentDidMount(){
   this.interval = setInterval(
     () => {
       if (true) {
-        for (let i=0 ; i < this.state.myCoins.length; i++){
-          this.updatePriceOfCoin(this.state.myCoins[i]['id']);
-        }
+        this.updatePriceOfCoin();
       }
     },
     10000
@@ -117,14 +138,15 @@ coinOwned = (coinId) => {
   var i = 0;
   for (i; i<this.state.myCoins.length;i++){
     if (this.state.myCoins[i].id === coinId){
-      return true;
+      return i;
     }
   }
-  return false;
+  return -1;
 }
 
+
 handleSubmit = selected => {
-  if (this.coinOwned(this.state.selected.id)){
+  if (this.coinOwned(this.state.selected.id) !== -1){
     alert(this.state.selected.id + ' is added already!');
   }else {
     this.setState({myCoins: this.state.myCoins.concat(this.state.selected),
@@ -135,15 +157,29 @@ handleSubmit = selected => {
   selected.preventDefault();
 }
 
+delete(item){
+  console.log(item.id);
+  const myNewCoins = this.state.myCoins.filter(i => i.id !== item.id);
+  this.setState({myCoins: myNewCoins},
+    () => {
+    localStorage.setItem('myCoins', JSON.stringify(this.state.myCoins))
+  });
+}
+
+play(coin){
+  console.log(coin.id);
+}
+
+
 
   render(){
     const {coins, myCoins} = this.state;
     if (this.state.myCoins && this.state.myCoins.length > 0){
     return(
-      <div>
+      <div className="page">
         <NavBar/>
-        <TimeComponent/>
-        <div className="container" style={{width: 'device-width', initialScale: '1.0', margin: '0 auto'}}>
+        <Welcome/>
+        <div className="container">
         <form onSubmit={this.handleSubmit}>
           <label>
             Choose a coin that you are interested in:
@@ -157,18 +193,30 @@ handleSubmit = selected => {
           </label>
           <input type="submit" value="Submit"/>
         </form>
-          <div>
+          <div className="coins">
             {myCoins.map(coin => (
               
-              
-                <div key={coin.rank}>
-                <Speech text={Number(coin.priceUsd).toFixed(2)}>play</Speech>
-                <img src={"https://cryptologos.cc/logos/" + coin.id + "-" + coin.symbol.toLowerCase() + "-logo.png?v=013" } width="36" height="36" alt={coin.id}></img>
-                {coin.id} - {Number(coin.priceUsd).toFixed(2)}</div>
+                
+                <div className="my-coins-container" key={coin.rank}>
+                  <div className="my-coins">
+                  <img src={"https://cryptologos.cc/logos/" + coin.id + "-" + coin.symbol.toLowerCase() + "-logo.png?v=013" } width="36" height="36" alt={coin.id}></img>
+                  {"   "}{coin.id} ({coin.symbol}) - {Number(coin.priceUsd).toFixed(2)} $
+                  </div>
+                  <div className="my-buttons">
+                  <Speech textAsButton={true} onClick={this.play.bind(this, coin)} displayText="PLAY" text={coin.id + "is" + Number(coin.priceUsd).toFixed(2) + "dollars"}></Speech>
+                  <Player className="player" coin={coin}/>
+                  <button className="btn btn-danger" onClick={this.delete.bind(this, coin)}>DEL</button>
+                  </div>
+                  <br style={{clear: 'both'}}/>
+                </div>
               
               
             ))}
           </div>
+        </div>
+        <div className="empty-div"></div>
+        <div className="footer">
+          <TimeComponent/>
         </div>
       </div>
     );
@@ -177,8 +225,8 @@ handleSubmit = selected => {
     return(
       <React.Fragment>
         <NavBar/>
-        <TimeComponent/>
-        <div className="container" style={{width: 'device-width', initialScale: '1.0', margin: '0 auto'}}>
+        <Welcome/>
+        <div className="container">
         <form onSubmit={this.handleSubmit}>
           <label>
             Choose a coin that you are interested in:
@@ -192,6 +240,9 @@ handleSubmit = selected => {
           </label>
           <input type="submit" value="Submit"/>
         </form>
+        </div>
+        <div className="footer">
+          <TimeComponent/>
         </div>
       </React.Fragment>
     );

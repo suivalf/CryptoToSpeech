@@ -1,15 +1,20 @@
 import React, { Component } from "react";
-
+import { Link } from "react-router-dom";
+import TimeComponent from "./time";
 // Stateless Fuunctional Component
 class NavBar extends Component {
   state = {};
   render() {
     return (
       <nav className="autohide navbar navbar-expand-lg navbar-dark bg-primary">
+        <script src="navbar.js"></script>
+
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
-            CTS
-          </a>
+          <Link to="">
+            <a className="navbar-brand" href="">
+              CTS
+            </a>
+          </Link>
           <button
             className="navbar-toggler"
             type="button"
@@ -18,13 +23,16 @@ class NavBar extends Component {
           >
             <span className="navbar-toggler-icon"></span>
           </button>
+
           <div className="collapse navbar-collapse" id="main_nav">
             <ul className="navbar-nav ms-auto">
               <li className="nav-item">
-                <a className="nav-link" href="#">
-                  {" "}
-                  Menu item{" "}
-                </a>
+                <Link to="/about">
+                  <a className="nav-link" href="">
+                    {" "}
+                    About{" "}
+                  </a>
+                </Link>
               </li>
             </ul>
           </div>
