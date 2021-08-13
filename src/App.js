@@ -201,6 +201,7 @@ formatPrice(price){
     if (this.state.myCoins && this.state.myCoins.length > 0){
     return(
       <div className="page">
+        <p></p>
         <NavBar/>
         <Welcome/>
         <div className="container">
