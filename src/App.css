@@ -33,21 +33,21 @@ p {
   font-size: 16px;
 }
 
+a:hover {
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+}
 .submit {
   font-family: 'Roboto Mono', monospace;
-  font-size: 15px;
+  font-family : inherit;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .page {
   height: 100%;
   width: 100%;
 }
-
-.play-button {
-  color: red;
-  size: 30px;
-}
-
 .container {
   text-align: center;
   position: flex;

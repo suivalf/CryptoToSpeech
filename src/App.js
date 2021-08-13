@@ -43,7 +43,7 @@ getCoinsData = async () => {
       (result) => {
         this.setState({
           coins: result.data,
-          selected: this.state.coins[0]
+          //selected: this.state.coins[0]
         }, () => {
           localStorage.setItem('coins', JSON.stringify(this.state.coins))
         });
@@ -159,13 +159,15 @@ coinOwned = (coinId) => {
 
 
 handleSubmit = selected => {
-  if (this.coinOwned(this.state.selected.id) !== -1){
+  console.log(this.state.selected.id);
+  if (this.coinOwned(this.state.selected.id) !== -1 && this.state.selected.id !== undefined){
     alert(this.state.selected.id + ' is added already!');
-  }else {
-    this.setState({myCoins: this.state.myCoins.concat(this.state.selected),
-    selected: this.state.coins[0]}, () => {
+  }else if (this.state.selected.id !== undefined){
+    this.setState({myCoins: this.state.myCoins.concat(this.state.selected)}, () => {
       localStorage.setItem('myCoins', JSON.stringify(this.state.myCoins))
     })
+  }else{
+    alert('Choose an option first.');
   }
   selected.preventDefault();
 }
@@ -201,13 +203,12 @@ formatPrice(price){
     if (this.state.myCoins && this.state.myCoins.length > 0){
     return(
       <div className="page">
-        <p></p>
         <NavBar/>
         <Welcome/>
         <div className="container">
         <form onSubmit={this.handleSubmit}>
-          <select className="dropdown-items" onChange={this.handleChange}>
-          <option value="" selected disabled hidden>Choose from here</option>
+          <select className="dropdown-items" onChange={this.handleChange} defaultValue={'DEFAULT'}>
+          <option value="DEFAULT" disabled>Choose from here</option>
             {coins.map(coin => {
               return (
                 <option className="dropdown-items" key={coin.id} value={coin.id}>{coin.id}</option>
@@ -218,7 +219,6 @@ formatPrice(price){
           <input className="submit" type="submit" value="Add"/>
         </form>
           <div className="coins">
-      
             {myCoins.map(coin => (
               
           
@@ -233,6 +233,7 @@ formatPrice(price){
                   <div className="my-buttons">
                   {/* <Speech textAsButton={true}  displayText="PLAY" text={coin.id + "is" + Number(coin.priceUsd).toFixed(2) + "dollars"}></Speech> */}
                   <button className="play-button">PLAY</button>
+          
                   <button className="delete-button" onClick={this.delete.bind(this, coin)}>DEL</button>
                   </div>
         
@@ -258,11 +259,11 @@ formatPrice(price){
         <Welcome/>
         <div className="container">
         <form onSubmit={this.handleSubmit}>
-        <select className="dropdown-items" onChange={this.handleChange}>
-          <option value="" selected disabled hidden>Choose from here</option>
+        <select className="dropdown-items" onChange={this.handleChange} defaultValue={'DEFAULT'}>
+          <option value="DEFAULT" disabled>Choose from here</option>
             {coins.map(coin => {
               return (
-                <option className="dropdown-items" key={coin.id} value={coin.id}>{coin.id}</option>
+                <option className="items" key={coin.id} value={coin.id}>{coin.id}</option>
               )
             })}
           </select>
