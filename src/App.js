@@ -9,9 +9,21 @@ import Player from './components/Player';
 import { useSpeechSynthesis } from "react-speech-kit";
 import Example from './components/talk';
 
-const styleContainer = {
-  color: "Gray"
-}
+
+const style = {
+  play: {
+    button: {
+      width: '10',
+      height: '10',
+      cursor: 'pointer',
+      pointerEvents: 'none',
+      outline: 'none',
+      backgroundColor: 'aqua',
+      border: 'solid 1px rgba(255,255,255,1)',
+      borderRadius: 6
+    },
+  }
+};
 
 class App extends Component{
 
@@ -101,6 +113,7 @@ helperFunctionForAdding = async () => {
 componentDidMount(){
   // Get all coins from the API at load time
   this.getCoinsData();
+  this.updatePriceOfCoin();
   // Update all coins once a day
   this.interval = setInterval(
     () => {
@@ -170,6 +183,17 @@ play(coin){
   console.log(coin.id);
 }
 
+formatPrice(price){
+  if (price < 1){
+    return Number(price).toFixed(3);
+  }else if (price < 100){
+    return Number(price).toFixed(2);
+  }else if (price < 1000){
+    return Number(price).toFixed(1);
+  }else{
+    return Number(price).toFixed(0);
+  }
+}
 
 
   render(){
@@ -181,37 +205,42 @@ play(coin){
         <Welcome/>
         <div className="container">
         <form onSubmit={this.handleSubmit}>
-          <label>
-            Choose a coin that you are interested in:
-          <select className="form form-select" onChange={this.handleChange}>
+          <select className="dropdown-items" onChange={this.handleChange}>
+          <option value="" selected disabled hidden>Choose from here</option>
             {coins.map(coin => {
               return (
-                <option key={coin.id} value={coin.id}>{coin.id}</option>
+                <option className="dropdown-items" key={coin.id} value={coin.id}>{coin.id}</option>
               )
             })}
           </select>
-          </label>
-          <input type="submit" value="Submit"/>
+         
+          <input className="submit" type="submit" value="Add"/>
         </form>
           <div className="coins">
+      
             {myCoins.map(coin => (
               
-                
+          
                 <div className="my-coins-container" key={coin.rank}>
+                 
                   <div className="my-coins">
                   <img src={"https://cryptologos.cc/logos/" + coin.id + "-" + coin.symbol.toLowerCase() + "-logo.png?v=013" } width="36" height="36" alt={coin.id}></img>
-                  {"   "}{coin.id} ({coin.symbol}) - {Number(coin.priceUsd).toFixed(2)} $
+                  {"   "}{coin.id} ({coin.symbol}) - <span className="price-paragraph">{this.formatPrice(coin.priceUsd)} </span> $ 
                   </div>
+             
+           
                   <div className="my-buttons">
-                  <Speech textAsButton={true} onClick={this.play.bind(this, coin)} displayText="PLAY" text={coin.id + "is" + Number(coin.priceUsd).toFixed(2) + "dollars"}></Speech>
-                  <Player className="player" coin={coin}/>
-                  <button className="btn btn-danger" onClick={this.delete.bind(this, coin)}>DEL</button>
+                  {/* <Speech textAsButton={true}  displayText="PLAY" text={coin.id + "is" + Number(coin.priceUsd).toFixed(2) + "dollars"}></Speech> */}
+                  <button className="play-button">PLAY</button>
+                  <button className="delete-button" onClick={this.delete.bind(this, coin)}>DEL</button>
                   </div>
+        
                   <br style={{clear: 'both'}}/>
                 </div>
-              
+      
               
             ))}
+   
           </div>
         </div>
         <div className="empty-div"></div>
@@ -228,17 +257,16 @@ play(coin){
         <Welcome/>
         <div className="container">
         <form onSubmit={this.handleSubmit}>
-          <label>
-            Choose a coin that you are interested in:
-          <select className="form form-select" onChange={this.handleChange}>
+        <select className="dropdown-items" onChange={this.handleChange}>
+          <option value="" selected disabled hidden>Choose from here</option>
             {coins.map(coin => {
               return (
-                <option key={coin.id} value={coin.id}>{coin.id}</option>
+                <option className="dropdown-items" key={coin.id} value={coin.id}>{coin.id}</option>
               )
             })}
           </select>
-          </label>
-          <input type="submit" value="Submit"/>
+          
+          <input className="submit" type="submit" value="Add"/>
         </form>
         </div>
         <div className="footer">
