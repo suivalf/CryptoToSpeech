@@ -33,7 +33,7 @@ export default class TimeComponent extends Component {
   };
 
   componentDidMount() {
-    console.log("TimeComponent Mounted...");
+    //console.log("TimeComponent Mounted...");
     this.interval = setInterval(
       () =>
         this.setState({

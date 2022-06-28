@@ -1,29 +1,9 @@
 import React, {Component} from 'react';
 import './App.css';
 import TimeComponent from './components/time';
-import Speech from 'react-speech';
-import Talk from './components/talk';
 import NavBar from './components/navbar';
 import Welcome from './components/welcome';
-import Player from './components/Player';
-import { useSpeechSynthesis } from "react-speech-kit";
-import Example from './components/talk';
 
-
-const style = {
-  play: {
-    button: {
-      width: '10',
-      height: '10',
-      cursor: 'pointer',
-      pointerEvents: 'none',
-      outline: 'none',
-      backgroundColor: 'aqua',
-      border: 'solid 1px rgba(255,255,255,1)',
-      borderRadius: 6
-    },
-  }
-};
 
 class App extends Component{
 
@@ -33,12 +13,16 @@ constructor(props){
     coins: JSON.parse(localStorage.getItem('coins')) || [],
     selected: JSON.parse(localStorage.getItem('selected')) || [],
     myCoins: JSON.parse(localStorage.getItem('myCoins')) || [],
+    
  }
+ 
 }
+
+
 
 getCoinsData = async () => {
   //https://agile-plateau-78718.herokuapp.com/
-    fetch("http://localhost:8080/https://api.coincap.io/v2/assets/").then(
+    fetch("https://api.coincap.io/v2/assets/").then(
     res => res.json()).then(
       (result) => {
         this.setState({
@@ -47,10 +31,10 @@ getCoinsData = async () => {
         }, () => {
           localStorage.setItem('coins', JSON.stringify(this.state.coins))
         });
-        console.log(this.state.coins);
+        //console.log(this.state.coins);
       },
       (error) => {
-        //console.log('Yikes ' + error);
+        console.log(error);
         this.getCoinsData();
       }
     )
@@ -67,7 +51,7 @@ getCoinIndex = (coinId) => {
 }
 
 updatePriceOfCoin = async () => {
-  fetch("http://localhost:8080/https://api.coincap.io/v2/assets/").then(
+  fetch("https://api.coincap.io/v2/assets/").then(
     res => res.json()).then(
       (result) => {
         this.setState({
@@ -79,7 +63,7 @@ updatePriceOfCoin = async () => {
         let myOldCoins = [...this.state.myCoins];
         for (i; i < this.state.myCoins.length; i++){
           let index = this.getCoinIndex(this.state.myCoins[i].id);
-          
+          //console.log(this.state.coins[index].priceUsd);
           // Make a shallow copy of the coin to be mutated
           let myOldCoin = {...myOldCoins[i]};
           // Replace it's old price with the new price
@@ -95,7 +79,7 @@ updatePriceOfCoin = async () => {
 
       },
       (error) => {
-        //console.log('Yikes ' + error);
+        console.log(error);
         this.updatePriceOfCoin();
       }
     )
@@ -111,14 +95,16 @@ helperFunctionForAdding = async () => {
 }
 
 componentDidMount(){
+  //clear storage in case of bugs (for development only)
+  //localStorage.clear();
   // Get all coins from the API at load time
   this.getCoinsData();
   this.updatePriceOfCoin();
-  // Update all coins once a day
+  // Update all coins once per minute
   this.interval = setInterval(
     () => {
     this.getCoinsData()},
-    1000 * 60 * 60 * 24
+    1000 * 60
   );
   
   // Update prices of our "portfolio" coins once every 10 seconds
@@ -126,6 +112,7 @@ componentDidMount(){
     () => {
       if (true) {
         this.updatePriceOfCoin();
+        
       }
     },
     10000
@@ -142,8 +129,10 @@ componentDidMount(){
 } */
 
 handleChange = (selectedOptions) => {
+  console.log(selectedOptions.target.value);
   this.setState({selected: this.state.coins.find(el => el.id === selectedOptions.target.value)});
 }
+
 
 // Function that tells if a coin is already in our portfolio
 // Returns True, if the coin id exists and False otherwise
@@ -159,7 +148,7 @@ coinOwned = (coinId) => {
 
 
 handleSubmit = selected => {
-  console.log(this.state.selected.id);
+  //console.log(this.state.selected.id);
   if (this.coinOwned(this.state.selected.id) !== -1 && this.state.selected.id !== undefined){
     alert(this.state.selected.id + ' is added already!');
   }else if (this.state.selected.id !== undefined){
@@ -173,7 +162,7 @@ handleSubmit = selected => {
 }
 
 delete(item){
-  console.log(item.id);
+  //console.log(item.id);
   const myNewCoins = this.state.myCoins.filter(i => i.id !== item.id);
   this.setState({myCoins: myNewCoins},
     () => {
@@ -197,6 +186,11 @@ formatPrice(price){
   }
 }
 
+handleChange2 = (selectedOptions) => {
+  localStorage.setItem(selectedOptions.target.className, selectedOptions.target.value);
+  //console.log(selectedOptions.target.className);
+  //console.log(selectedOptions.target.value);
+}
 
   render(){
     const {coins, myCoins} = this.state;
@@ -216,8 +210,9 @@ formatPrice(price){
             })}
           </select>
          
-          <input className="submit" type="submit" value="Add"/>
+          <input className="submit" type="submit" value="Add"></input>
         </form>
+        <br/>
           <div className="coins">
             {myCoins.map(coin => (
               
@@ -226,20 +221,64 @@ formatPrice(price){
                  
                   <div className="my-coins">
                   <img src={"https://cryptologos.cc/logos/" + coin.id + "-" + coin.symbol.toLowerCase() + "-logo.png?v=013" } width="36" height="36" alt={coin.id}></img>
-                  {"   "}{coin.id} ({coin.symbol}) - <span className="price-paragraph">{this.formatPrice(coin.priceUsd)} </span> $ 
+                  {"   "} {coin.symbol} - <span className="price-paragraph" id={coin.id}>{this.formatPrice(coin.priceUsd)} </span> $ 
+                  
                   </div>
-             
+
+                  <div className="my-delay">
+                    <form>
+                      <select className={`timer-${coin.id}`} onChange={this.handleChange2} id="5" defaultValue={5}>
+                        <option className='timer-option' value="5" disabled>Change timer</option>
+                        <option className='timer-option' value="10">10 seconds</option>
+                        <option className='timer-option' value="30">30 seconds</option>
+                        <option className='timer-option' value="60">1 minute</option>
+                        <option className='timer-option' value="300">5 minutes</option>
+                        <option className='timer-option' value="600">10 minutes</option>
+                        <option className='timer-option' value="1800">30 minutes</option>
+                        <option className='timer-option' value="3600">1 hour</option>
+                        <option className='timer-option' value="7200">2 hours</option>
+                      </select>
+                    </form>
+                  </div>
            
                   <div className="my-buttons">
-                  {/* <Speech textAsButton={true}  displayText="PLAY" text={coin.id + "is" + Number(coin.priceUsd).toFixed(2) + "dollars"}></Speech> */}
-                  <button className="play-button">PLAY</button>
-          
-                  <button className="delete-button" onClick={this.delete.bind(this, coin)}>DEL</button>
+                  <button value="play" className="play-button" onClick={(e) => {
+                    var price = new window.SpeechSynthesisUtterance();
+                    if (e.target.className === "fa fa-play"){
+                      e.target.className = "fa fa-pause";
+                      
+                      this.interval = setInterval(
+                        () => {
+                          if (document.getElementById(coin.id) != null){
+                            price.text = coin.id + " is ";
+                            price.text = price.text + document.getElementById(coin.id).innerText;
+                            price.text = price.text + "$";
+                          
+                          price.lang = 'en';
+                          window.speechSynthesis.speak(price);
+                          //console.log(localStorage.getItem("timer-"+coin.id))
+                          }else{
+                            clearInterval();
+                          }
+                          },
+                        1000 * localStorage.getItem("timer-"+coin.id)
+                      );
+                      localStorage.setItem(coin.id, this.interval);
+                    }else{
+                      clearInterval(localStorage.getItem(coin.id));
+                      window.speechSynthesis.cancel(price);
+                      e.target.className = "fa fa-play";
+                    }
+                       
+                        
+                    }}><i className="fa fa-play"></i></button>
+                  <button className="delete-button" onClick={this.delete.bind(this, coin)}><i className="fa fa-window-close"></i></button>
                   </div>
         
                   <br style={{clear: 'both'}}/>
+                  
                 </div>
-      
+            
               
             ))}
    
